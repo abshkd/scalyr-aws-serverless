@@ -344,35 +344,33 @@ def process_cf_event(event):
         matched_log_group_options = match_log_groups(aws_log_groups, log_group_options)
 
         if event['RequestType'] == 'Create':
+            lambda_add_permission('*', destination_arn, account_id, region)
             for log_group_name, options in matched_log_group_options.items():
-                lambda_add_permission(log_group_name, destination_arn, account_id, region)
                 put_subscription_filter(log_group_name, options, destination_arn)
         elif event['RequestType'] == 'Update':
             old_log_group_options = load_log_group_options(event, 'OldResourceProperties')
             old_matched_log_group_options = match_log_groups(aws_log_groups, old_log_group_options)
             added, updated, deleted = diff_log_groups(matched_log_group_options, old_matched_log_group_options)
             if event['OldResourceProperties']['AutoSubscribeLogGroups'] == 'false':
+                lambda_add_permission('*', destination_arn, account_id, region)
                 # We don't know the current state of the subscription filters as we weren't in charge
                 for log_group_name, options in matched_log_group_options.items():
                     # So create/update subscription filters for all the logGroups that matched
-                    lambda_add_permission(log_group_name, destination_arn, account_id, region)
                     put_subscription_filter(log_group_name, options, destination_arn)
             else:
                 # We were in charge previously
+                lambda_add_permission('*', destination_arn, account_id, region)
                 for log_group_name, options in matched_log_group_options.items():
                     # So only create/update subscription filters for added or updated logGroups
                     if log_group_name in added or log_group_name in updated:
-                        lambda_add_permission(log_group_name, destination_arn, account_id, region)
                         put_subscription_filter(log_group_name, options, destination_arn)
             for log_group_name, options in old_matched_log_group_options.items():
                 # Attempt to delete subcription filters for logGroups that are no longer defined
                 if log_group_name in deleted:
                     delete_subscription_filter(log_group_name, options)
-                    lambda_remove_permission(log_group_name, destination_arn)
         elif event['RequestType'] == 'Delete':
             for log_group_name, options in matched_log_group_options.items():
                 delete_subscription_filter(log_group_name, options)
-                lambda_remove_permission(log_group_name, destination_arn)
 
 def process_create_log_group_event(event):
     """Processes a CloudWatch CreateLogGroup event
@@ -394,7 +392,6 @@ def process_create_log_group_event(event):
 
         matched_group_options = match_log_groups([log_group_name], log_group_options)
         for log_group_name, options in matched_group_options.items():
-            lambda_add_permission(log_group_name, os.environ['DESTINATION_ARN'], os.environ['AWS_ACCOUNT_ID'], os.environ['AWS_REGION'])
             put_subscription_filter(log_group_name, options, os.environ['DESTINATION_ARN'])
 
 

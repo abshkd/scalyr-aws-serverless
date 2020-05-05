@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Description: >-
-  Scalyr CloudWatch Logs Importer
+  Scalyr CloudWatch Logs Importer (fork)
 
 Parameters:
   BaseUrl:
@@ -39,9 +39,9 @@ Parameters:
 Mappings:
   RegionMap:
     us-east-1:
-      bucket: 'scalyr-aws-serverless'
+      bucket: 'abhishek-functions'
       prefix: 'cloudwatch_logs'
-      version: 1.0.2
+      version: 1.0.71
 # END MAPPINGS    (do not change comment, publish.sh depends on this)
 
 Conditions:

@@ -229,7 +229,7 @@ def lambda_add_permission(log_group_name, destination_arn, account_id, region):
             StatementId=uuid5(UUID_SEED, log_group_name).hex,
             Action='lambda:InvokeFunction',
             Principal=f"logs.{region}.amazonaws.com",
-            SourceArn=f"arn:aws:logs:{region}:{account_id}:log-group:{log_group_name}:*",
+            SourceArn=f"arn:aws:logs:{region}:{account_id}:*",
             SourceAccount=account_id
         )
     except LAMBDA.exceptions.ResourceConflictException as e:
